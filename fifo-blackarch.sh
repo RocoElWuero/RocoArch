@@ -58,7 +58,7 @@ saveEfi() {
 	touch "/mnt/${efi/\/dev\//}.dd"
 	shred -zvuf "/mnt/${efi/\/dev\//}.dd"
 	dd if="${efi}" of="/mnt/${efi/\/dev\//}.dd" conv=noerror,sync #https://poesiabinaria.net/2015/10/9-trucos-para-manejar-cadenas-de-caracteres-en-bash-y-no-morir-en-el-intento/
-	[[ "$(sha512sum "/mnt/${efi/\/dev\//}.dd")" != "$(sha512sum "${efi}")" ]] && echo -e "${RED}Error Backup to EFI partition! => 1${NORMAL}" && exit 1
+	[[ "$(sha512sum "/mnt/${efi/\/dev\//}.dd" | awk '{print $1}')" != "$(sha512sum "${efi}" | awk '{print $1}')" ]] && echo -e "${RED}Error Backup to EFI partition! => 1${NORMAL}" && exit 1
 	umount "${data}"
 	echo -e "${GREEN}Successfully EFI mode!${NORMAL}"
 }
