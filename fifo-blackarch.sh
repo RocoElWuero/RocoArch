@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 status="${1}"
 NORMAL='\033[0m'
@@ -16,7 +16,7 @@ saveEfi() {
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 		unset devices
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
-		read -r "What is your EFI partition? " efi
+		read -p "What is your EFI partition? " efi
 		pause
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
@@ -31,7 +31,7 @@ saveEfi() {
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 		unset devices
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
-		read -r "What is your Windows DATA partition? " data
+		read -p "What is your Windows DATA partition? " data
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
 			break
