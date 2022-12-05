@@ -200,12 +200,12 @@ setup_lvm() {
 	lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 	echo -e "${GREEN}1024 MB = 1 GB\n2048 MB = 2 GB\n4096 MB = 4 GB\n8192 MB = 8 GB${NORMAL}"
 	echo -e "${RED}\tDon't make mistake.${NORMAL}"
-	for ((i=1; i<number_partitions; ++i)); do
+	for ((i=1; i<=number_partitions; ++i)); do
 		while true; do
 			printf "%s" "Enter ${i}ª partition name [ex: home]: "
 			read -r partition_name
 			echo "partition_name: ${partition_name}"
-			read -p "Are you sure? (y/n)" status
+			read -p "Are you sure? (y/n) " status
 			[[ "${status}" = "Y" || "${status}" = "y" ]] && break
 		done
 		if [[ ${i} -eq ${number_partitions} ]]; then
@@ -216,7 +216,7 @@ setup_lvm() {
 				printf "%s" "Enter ${i}ª partition size [ex: 25G, 200M]: "
 				read -r partition_size
 				echo "partition_size: ${partition_size}"
-				read -p "Are you sure? (y/n)" status
+				read -p "Are you sure? (y/n) " status
 				[[ "${status}" = "Y" || "${status}" = "y" ]] && break
 			done
 			lvcreate -L "${partition_size}" lvm -n "${partition_name}"
