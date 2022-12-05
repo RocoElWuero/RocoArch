@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 status="${1}"
 NORMAL='\033[0m'
