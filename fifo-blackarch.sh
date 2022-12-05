@@ -17,11 +17,10 @@ saveEfi() {
 		unset devices
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
 		read -p "What is your EFI partition? " efi
-		pause
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
 			break
-		elif [[ ${device} =~ ^/dev/[a-z][a-z|0-9]+$ ]]; then
+		elif [[ ${device} =~ ^/dev/[a-z]+[a-z|0-9]+$ ]]; then
 			break
 		else
 			clear
@@ -35,7 +34,7 @@ saveEfi() {
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
 			break
-		elif [[ ${device} =~ ^/dev/[a-z][a-z|0-9]+$ ]]; then
+		elif [[ ${device} =~ ^/dev/[a-z]+[a-z|0-9]+$ ]]; then
 			break
 		else
 			clear
@@ -95,7 +94,7 @@ create_partition() {
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
 			break
-		elif [[ ${device} =~ ^/dev/[a-z][a-z|0-9]+$ ]]; then
+		elif [[ ${device} =~ ^/dev/[a-z]+[a-z|0-9]+$ ]]; then
 			break
 		fi
 	done
