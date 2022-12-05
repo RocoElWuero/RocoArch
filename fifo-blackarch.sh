@@ -15,7 +15,7 @@ contains_element() {
 	#check if an element exist in a string
 	for e in "${@:2}"; do [[ "${e}" == "${1}" ]] && break; done
 }
-saveEfi() {
+saveEfi() { # => 1
 	while true; do
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 		unset devices device
@@ -65,12 +65,13 @@ saveEfi() {
 check_trim() { #https://www.compuhoy.com/como-habilito-trim-en-linux/
 	[[ -n $(hdparm -I /dev/sda | grep "TRIM" 2>/dev/null) ]] && TRIM=1
 }
-verifyEfiBoot() {
+verifyEfiBoot() { # => 2
+	modprobe -q efivarfs
 	[[ ! -d /sys/firmware/efi/efivars/ ]] && echo -e "${RED}Error in EFI mode! => 2${NORMAL}" && exit 2
 	mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 	echo -e "${GREEN}Successfully EFI mode!${NORMAL}"
 }
-updateDateAndTime() {
+updateDateAndTime() { # => 3
 	timedatectl status
 	[[ $(timedatectl status | grep "Time zone: UTC") ]] && timedatectl set-timezone America/Mexico_City
 	[[ ${?} -ne 0 ]] && echo -e "${RED}Error in date and time update! => 3${NORMAL}" && exit 3
@@ -78,13 +79,13 @@ updateDateAndTime() {
 	timedatectl status
 	echo -e "${GREEN}Successfully date and time updated!${NORMAL}"
 }
-selectKeymap() {
+selectKeymap() { # => 4
 	echo -e "${BLUE}KEYMAP - https://wiki.archlinux.org/index.php/KEYMAP${NORMAL}"
 	loadkeys en
 	[[ ${?} -ne 0 ]] && echo -e "${RED}Error in Keymap! => 4${NORMAL}" && exit 4
 	echo -e "${GREEN}Successfully keymap selected!${NORMAL}"
 }
-configure_mirrorlist() {
+configure_mirrorlist() { # => 5
 	# Modified from: https://stackoverflow.com/a/24628676
 	echo -e "${BLUE}MIRRORLIST - https://wiki.archlinux.org/index.php/Mirrors${NORMAL}"
 	[[ -f /etc/pacman.d/mirrorlist ]] && mv /etc/pacman.d/mirrorlist /etc/pacman.d/.mirrorlist.bkp
@@ -95,7 +96,7 @@ configure_mirrorlist() {
 	chmod +r /etc/pacman.d/mirrorlist
 	vim  /etc/pacman.d/mirrorlist
 }
-create_partition() {
+create_partition() { # => 6
 	while true; do
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 		devices=($(fdisk -l | grep -E "^Disk /dev/.*:" | grep -v "loop" | awk '{print $2}' | tr ":" " "))
@@ -122,7 +123,7 @@ create_partition() {
 	echo -e "${GREEN}Successfully partitioned!${NORMAL}"
 	lsblk
 }
-setup_luks() {
+setup_luks() { # => 7
 	echo -e "${BLUE}LUKS - https://wiki.archlinux.org/index.php/LUKS${NORMAL}"
 	echo -e "${GREEN}The Linux Unified Key Setup or LUKS is a disk-encryption specification created by Clemens Fruhwirth and originally intended for Linux.${NORMAL}"
 	echo -e "${RED}\tDo not use this (${device}) for boot partitions.${NORMAL}"
@@ -177,7 +178,7 @@ setup_luks() {
 		done
 	}
 block
-setup_lvm() {
+setup_lvm() { # => 8
 	echo -e "${BLUE}LVM - https://wiki.archlinux.org/index.php/LVM${NORMAL}"
 	echo -e "${GREEN}LVM is a logical volume manager for the Linux kernel; it manages disk drives and similar mass-storage devices.${NORMAL}"
 	echo -e "${RED}\tLast partition will take 100% of free space left.${NORMAL}"
@@ -194,8 +195,6 @@ setup_lvm() {
 		read -p "Enter the NUMBER of logical volumes/partitions (bigger than 1) [ex: / /home swap etc. ]: " number_partitions
 		[[ ${number_partitions} -gt 1 ]] && break
 	done
-	i=1
-	#while [[ ${i} -le ${number_partitions} ]]; do
 	pvs
 	lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 	echo -e "${GREEN}1024 MB = 1 GB\n2048 MB = 2 GB\n4096 MB = 4 GB\n8192 MB = 8 GB${NORMAL}"
@@ -210,6 +209,8 @@ setup_lvm() {
 		done
 		if [[ ${i} -eq ${number_partitions} ]]; then
 			lvcreate -l 100%FREE lvm -n "${partition_name}"
+			[[ ${?} -ne 0 ]] && echo -e "${RED}Error in Logical Volume created (${partition_name} of ${partition_size})! => 8${NORMAL}" && exit 8
+			echo -e "${GREEN}Successfully Logical Volume created (${partition_name} of ${partition_size})!${NORMAL}"
 			lvs
 		else
 			while true; do
@@ -220,9 +221,10 @@ setup_lvm() {
 				[[ "${status}" = "Y" || "${status}" = "y" ]] && break
 			done
 			lvcreate -L "${partition_size}" lvm -n "${partition_name}"
+			[[ ${?} -ne 0 ]] && echo -e "${RED}Error in Logical Volume created (${partition_name} of ${partition_size})! => 8${NORMAL}" && exit 8
+			echo -e "${GREEN}Successfully Logical Volume created (${partition_name} of ${partition_size})!${NORMAL}"
 			lvs
 		fi
-		#i=$((i + 1))
 	done
 	LVM=1
 }
@@ -274,15 +276,13 @@ setup_lvm() {
 		LVM=1
 	}
 block
-create_partition_scheme() {
+create_partition_scheme() { # => [6,7,8]
 	echo -e "${BLUE}https://wiki.archlinux.org/index.php/Partitioning${NORMAL}"
 	echo -e "${GREEN}Partitioning a hard drive allows one to logically divide the available space into sections that can be accessed independently of one another.${NORMAL}"
 	echo -e "${GREEN}LVM+LUKS${NORMAL}"
-	create_partition
-	pause
-	setup_luks
-	pause
-	setup_lvm
+	[[ "${*}" = "" ]] && create_partition && pause
+	[[ "${*}" = "" || ( ${#*} -eq 2 && ${1} -eq 7 ) ]] && setup_luks && pause
+	[[ "${*}" = "" || ( ${#*} -eq 1 && ${1} -eq 8 ) || ( ${#*} -eq 2 && ${1} -eq 7 && ${2} -eq 8 ) ]] && setup_lvm
 }
 format_partitions() { #================================================================================================================================
 	print_title "https://wiki.archlinux.org/index.php/File_Systems"
@@ -486,19 +486,74 @@ format_partitions() { #=========================================================
 
 mount -o remount,size=2G /run/archiso/cowspace
 
-case $status in
+case ${status} in
 	1)
-		saveEfi
+		saveEfi						#1
 		check_trim
-		verifyEfiBoot
-		selectKeymap
+		verifyEfiBoot				#2
+		updateDateAndTime			#3
+		selectKeymap				#4
 		pause
-		configure_mirrorlist
+		configure_mirrorlist		#5
 		pause
-		create_partition_scheme
+		create_partition_scheme		#6,7,8
 		pause
+		format_partitions			# ============= 9 =============
 		;;
 	2)
+		verifyEfiBoot				#2
+		updateDateAndTime			#3
+		selectKeymap				#4
+		pause
+		configure_mirrorlist		#5
+		pause
+		create_partition_scheme		#6,7,8
+		pause
+		format_partitions			# ============= 9 =============
+		;;
+	3)
+		updateDateAndTime			#3
+		selectKeymap				#4
+		pause
+		configure_mirrorlist		#5
+		pause
+		create_partition_scheme		#6,7,8
+		pause
+		format_partitions			# ============= 9 =============
+		;;
+	4)
+		selectKeymap				#4
+		pause
+		configure_mirrorlist		#5
+		pause
+		create_partition_scheme		#6,7,8
+		pause
+		format_partitions			# ============= 9 =============
+		;;
+	5)
+		configure_mirrorlist		#5
+		pause
+		create_partition_scheme		#6,7,8
+		pause
+		format_partitions			# ============= 9 =============
+		;;
+	6)
+		create_partition_scheme		#6,7,8
+		pause
+		format_partitions			# ============= 9 =============
+		;;
+	7)
+		create_partition_scheme 7 8	#7,8
+		pause
+		format_partitions			# ============= 9 =============
+		;;
+	8)
+		create_partition_scheme 8	#8
+		pause
+		format_partitions			# ============= 9 =============
+		;;
+	9)
+		format_partitions			# ============= 9 =============
 		;;
 esac
 exit 0
