@@ -26,10 +26,10 @@ saveEfi() {
 			i=$((i+1))
 		done
 		read -p "What is your EFI partition? " efi
-		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
-			device="${devices[${device}]}"
+		if [[ ${efi} =~ ^[0-9]+$ && ${efi} -ge 0 && ${efi} -le $((${#devices[*]} - 1)) ]]; then
+			efi="${devices[${efi}]}"
 			break
-		elif [[ ${device} =~ ^/dev/[a-z]+[a-z|0-9]+$ ]]; then
+		elif [[ ${efi} =~ ^/dev/[a-z]+[a-z|0-9]+$ ]]; then
 			break
 		else
 			clear
@@ -45,10 +45,10 @@ saveEfi() {
 			i=$((i+1))
 		done
 		read -p "What is your Windows DATA partition? " data
-		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
-			device="${devices[${device}]}"
+		if [[ ${data} =~ ^[0-9]+$ && ${data} -ge 0 && ${data} -le $((${#devices[*]} - 1)) ]]; then
+			data="${devices[${data}]}"
 			break
-		elif [[ ${device} =~ ^/dev/[a-z]+[a-z|0-9]+$ ]]; then
+		elif [[ ${data} =~ ^/dev/[a-z]+[a-z|0-9]+$ ]]; then
 			break
 		else
 			clear
