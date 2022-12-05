@@ -17,6 +17,7 @@ saveEfi() {
 		unset devices
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
 		read -r "What is your EFI partition? " efi
+		pause
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
 			break
