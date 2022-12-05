@@ -15,6 +15,7 @@ saveEfi() {
 	while true; do
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 		unset devices device
+		i=0
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
 		for device in ${devices[*]}; do
 			echo "${i}) ${devices[${i}]}"
@@ -33,6 +34,7 @@ saveEfi() {
 	while true; do
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
 		unset devices device
+		i=0
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
 		for device in ${devices[*]}; do
 			echo "${i}) ${devices[${i}]}"
