@@ -125,7 +125,7 @@ create_partition() {
 setup_luks() {
 	echo -e "${BLUE}LUKS - https://wiki.archlinux.org/index.php/LUKS${NORMAL}"
 	echo -e "${GREEN}The Linux Unified Key Setup or LUKS is a disk-encryption specification created by Clemens Fruhwirth and originally intended for Linux.${NORMAL}"
-	echo -e "${RED}\tDo not use this for boot partitions.${NORMAL}"
+	echo -e "${RED}\tDo not use this (${device}) for boot partitions.${NORMAL}"
 
 	echo -e "${RED}\tCapital letters is OPPER CASE.${NORMAL}"
 	cryptsetup --cipher aes-xts-plain64 --key-size 512 --hash sha512 --iter-time 5000 --use-random --verify-passphrase luksFormat "${device}"
