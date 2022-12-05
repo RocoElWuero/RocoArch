@@ -14,8 +14,12 @@ contains_element() {
 saveEfi() {
 	while true; do
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
-		unset devices
+		unset devices device
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
+		for device in ${devices[*]}; do
+			echo "${i}) ${devices[${i}]}"
+			i=$((i+1))
+		done
 		read -p "What is your EFI partition? " efi
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
@@ -28,8 +32,12 @@ saveEfi() {
 	done
 	while true; do
 		lsblk | grep -Ev "sr0|loop" && echo -e "${GREEN}=====================================${NORMAL}" && fdisk -l | head --lines=-6
-		unset devices
+		unset devices device
 		devices=($(fdisk -l | grep -E "^/dev/.*" | awk '{print $1}'))
+		for device in ${devices[*]}; do
+			echo "${i}) ${devices[${i}]}"
+			i=$((i+1))
+		done
 		read -p "What is your Windows DATA partition? " data
 		if [[ ${device} =~ ^[0-9]+$ && ${device} -ge 0 && ${device} -le $((${#devices[*]} - 1)) ]]; then
 			device="${devices[${device}]}"
