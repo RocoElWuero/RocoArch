@@ -5,8 +5,12 @@ NORMAL='\033[0m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
-alias pause="read -s -n 1 -p 'Press any key to continue . . .' && echo ''"
 
+
+pause() {
+	read -s -n 1 -p "Press any key to continue . . ."
+	echo ""
+}
 contains_element() {
 	#check if an element exist in a string
 	for e in "${@:2}"; do [[ "${e}" == "${1}" ]] && break; done
