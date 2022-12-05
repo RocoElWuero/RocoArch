@@ -60,7 +60,7 @@ saveEfi() {
 	dd if="${efi}" of="/mnt/${efi/\/dev\//}.dd" conv=noerror,sync #https://poesiabinaria.net/2015/10/9-trucos-para-manejar-cadenas-de-caracteres-en-bash-y-no-morir-en-el-intento/
 	[[ "$(sha512sum "/mnt/${efi/\/dev\//}.dd" | awk '{print $1}')" != "$(sha512sum "${efi}" | awk '{print $1}')" ]] && echo -e "${RED}Error Backup to EFI partition! => 1${NORMAL}" && exit 1
 	umount "${data}"
-	echo -e "${GREEN}Successfully EFI mode!${NORMAL}"
+	echo -e "${GREEN}Successfully backup EFI!${NORMAL}"
 }
 check_trim() { #https://www.compuhoy.com/como-habilito-trim-en-linux/
 	[[ -n $(hdparm -I /dev/sda | grep "TRIM" 2>/dev/null) ]] && TRIM=1
